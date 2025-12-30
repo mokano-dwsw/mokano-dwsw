@@ -1,4 +1,4 @@
-## Hi there 👋
+💻 SQL Engineer / 🏗️ Database Logical Designer
 
 <!--
 **mokano-dwsw/mokano-dwsw** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
