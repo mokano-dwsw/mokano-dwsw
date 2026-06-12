@@ -36,6 +36,21 @@ export interface DailyLog {
 /** レディネス判定の信号色 */
 export type ReadinessLevel = "green" | "yellow" | "red";
 
+/** ② 競技パフォーマンス (トレーニングログ) */
+export interface TrainingLog {
+  id: string; // uuid
+  athleteId: string;
+  logDate: string; // YYYY-MM-DD
+  menu?: string; // 練習メニュー
+  distanceM?: number; // 距離 (m)
+  durationMin?: number; // 時間 (分)
+  reps?: number; // 本数
+  result?: string; // タイム/記録
+  rpe?: number; // 主観的運動強度 (1〜10)
+  notes?: string;
+  updatedAt: string; // ISO datetime
+}
+
 /** ③ スケジュール・移動 (ロジスティクス) */
 export type ScheduleType = "practice" | "camp" | "competition" | "travel" | "other";
 

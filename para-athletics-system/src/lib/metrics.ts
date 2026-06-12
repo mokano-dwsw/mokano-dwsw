@@ -1,4 +1,4 @@
-import type { DailyLog } from "@/lib/types";
+import type { DailyLog, TrainingLog } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // 統計ユーティリティ
@@ -89,4 +89,22 @@ function scoreAroundTarget(value: number, lo: number, hi: number): number {
 /** 日付昇順に整列したコピーを返す */
 export function sortByDateAsc(logs: DailyLog[]): DailyLog[] {
   return [...logs].sort((a, b) => a.logDate.localeCompare(b.logDate));
+}
+
+// ---------------------------------------------------------------------------
+// トレーニング負荷 (セッション RPE 法: 時間[min] × RPE)
+//   要件: 「量(Volume) × 強度(Intensity)」で身体的ストレス総量を定量化する。
+// ---------------------------------------------------------------------------
+export function sessionLoad(t: TrainingLog): number {
+  if (typeof t.durationMin !== "number" || typeof t.rpe !== "number") return 0;
+  return t.durationMin * t.rpe;
+}
+
+/** 日付ごとのトレーニング負荷を合算する */
+export function dailyLoadByDate(trainings: TrainingLog[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const t of trainings) {
+    m.set(t.logDate, (m.get(t.logDate) ?? 0) + sessionLoad(t));
+  }
+  return m;
 }

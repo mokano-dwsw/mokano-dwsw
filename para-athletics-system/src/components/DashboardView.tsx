@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/offline";
 import { DEMO_ATHLETE_ID } from "@/lib/athlete";
 import { computeReadiness, LEVEL_LABEL, LEVEL_BG } from "@/lib/readiness";
-import { hrvSeries, recentHrvCV, sleepScore, sortByDateAsc } from "@/lib/metrics";
+import { hrvSeries, recentHrvCV, sleepScore, sortByDateAsc, dailyLoadByDate } from "@/lib/metrics";
 import { seedDemoData } from "@/lib/demo";
 import { SCHEDULE_META } from "@/lib/types";
 import BarLineChart, { type ChartPoint, type ChartMarker } from "@/components/charts/BarLineChart";
@@ -26,6 +26,10 @@ export default function DashboardView() {
   );
   const events = useLiveQuery(
     () => db.scheduleEvents.where("athleteId").equals(athleteId).toArray(),
+    [athleteId]
+  );
+  const trainings = useLiveQuery(
+    () => db.trainingLogs.where("athleteId").equals(athleteId).toArray(),
     [athleteId]
   );
   const [seeding, setSeeding] = useState(false);
@@ -82,6 +86,13 @@ export default function DashboardView() {
     bar: computeReadiness(l).score ?? undefined,
   }));
 
+  // トレーニング負荷 (日付ごとに合算) を HRV と同じ日付軸に並べる
+  const loadMap = dailyLoadByDate(trainings ?? []);
+  const loadPoints: ChartPoint[] = asc.map((l) => ({
+    label: l.logDate,
+    bar: loadMap.get(l.logDate) || undefined,
+  }));
+
   return (
     <div className="space-y-8">
       {/* サマリータイル */}
@@ -109,6 +120,16 @@ export default function DashboardView() {
           が低下する傾向を読み取る。
         </p>
         <BarLineChart points={hrvPoints} markers={markers} unit=" ms" />
+      </section>
+
+      {/* トレーニング負荷 (時間×RPE) */}
+      <section>
+        <h2 className="mb-1 font-semibold">トレーニング負荷</h2>
+        <p className="mb-2 text-xs text-gray-500">
+          セッションRPE法（時間×RPE）による日次負荷。{SCHEDULE_META.travel.icon} 移動 /{" "}
+          {SCHEDULE_META.competition.icon} 試合 を重ねて、負荷と移動・回復の関係を確認する。
+        </p>
+        <BarLineChart points={loadPoints} markers={markers} barColor="#fdba74" lineColor="#ea580c" />
       </section>
 
       {/* レディネス推移 */}

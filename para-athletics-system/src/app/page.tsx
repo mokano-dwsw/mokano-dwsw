@@ -20,6 +20,16 @@ export default function Home() {
         </Link>
 
         <Link
+          href="/training"
+          className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
+        >
+          <h2 className="text-lg font-semibold">🏃 トレーニング記録</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            練習メニュー・距離・RPE を記録。負荷（時間×RPE）を集計。
+          </p>
+        </Link>
+
+        <Link
           href="/schedule"
           className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
         >

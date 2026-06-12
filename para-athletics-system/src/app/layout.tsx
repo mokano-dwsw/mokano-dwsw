@@ -44,6 +44,9 @@ export default function RootLayout({
             <Link href="/checkin" className="text-sm text-gray-600 hover:text-gray-900">
               チェックイン
             </Link>
+            <Link href="/training" className="text-sm text-gray-600 hover:text-gray-900">
+              トレーニング
+            </Link>
             <Link href="/schedule" className="text-sm text-gray-600 hover:text-gray-900">
               スケジュール
             </Link>

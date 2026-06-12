@@ -1,4 +1,9 @@
-import { db, type DailyLogRecord, type ScheduleEventRecord } from "@/lib/db/offline";
+import {
+  db,
+  type DailyLogRecord,
+  type ScheduleEventRecord,
+  type TrainingLogRecord,
+} from "@/lib/db/offline";
 import type { Scale5 } from "@/lib/types";
 
 function isoDaysAgo(base: Date, daysAgo: number): string {
@@ -21,9 +26,11 @@ export async function seedDemoData(athleteId: string, days = 30): Promise<number
   const travelDates = new Set(travelDaysAgo.map((d) => isoDaysAgo(today, d)));
 
   const logs: DailyLogRecord[] = [];
+  const trainings: TrainingLogRecord[] = [];
   for (let d = days - 1; d >= 0; d--) {
     const iso = isoDaysAgo(today, d);
     const prevWasTravel = travelDates.has(isoDaysAgo(today, d + 1));
+    const isTravelDay = travelDates.has(iso);
 
     const wave = Math.sin(d / 4);
     let hrv = 62 + wave * 8 + (Math.random() - 0.5) * 8;
@@ -55,6 +62,23 @@ export async function seedDemoData(athleteId: string, days = 30): Promise<number
       updatedAt: isoToNoon(iso),
       syncStatus: "synced",
     });
+
+    // 移動日は休養。それ以外は隔日で練習を入れる (時間×RPE が負荷)
+    if (!isTravelDay && d % 2 === 0) {
+      const rpe = clamp(5 + Math.round(wave + (Math.random() - 0.5) * 2), 3, 9);
+      trainings.push({
+        id: `demo-tr-${iso}`,
+        athleteId,
+        logDate: iso,
+        menu: rpe >= 7 ? "スプリント 150m×6" : "リカバリージョグ + 可動域",
+        distanceM: rpe >= 7 ? 900 : 4000,
+        durationMin: rpe >= 7 ? 75 : 50,
+        reps: rpe >= 7 ? 6 : undefined,
+        rpe,
+        updatedAt: isoToNoon(iso),
+        syncStatus: "synced",
+      });
+    }
   }
 
   const events: ScheduleEventRecord[] = [
@@ -81,7 +105,12 @@ export async function seedDemoData(athleteId: string, days = 30): Promise<number
 
   await db.dailyLogs.bulkPut(logs);
   await db.scheduleEvents.bulkPut(events);
+  await db.trainingLogs.bulkPut(trainings);
   return logs.length;
+}
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, n));
 }
 
 function isoToNoon(iso: string): string {
