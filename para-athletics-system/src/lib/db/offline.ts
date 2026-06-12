@@ -1,10 +1,15 @@
 import Dexie, { type Table } from "dexie";
-import type { DailyLog } from "@/lib/types";
+import type { DailyLog, ScheduleEvent } from "@/lib/types";
 
 export type SyncStatus = "pending" | "synced";
 
 /** オフライン保存用のデイリーログ (同期状態を付与) */
 export interface DailyLogRecord extends DailyLog {
+  syncStatus: SyncStatus;
+}
+
+/** オフライン保存用のスケジュール (同期状態を付与) */
+export interface ScheduleEventRecord extends ScheduleEvent {
   syncStatus: SyncStatus;
 }
 
@@ -14,12 +19,16 @@ export interface DailyLogRecord extends DailyLog {
  */
 class ParaAthleticsDB extends Dexie {
   dailyLogs!: Table<DailyLogRecord, string>;
+  scheduleEvents!: Table<ScheduleEventRecord, string>;
 
   constructor() {
     super("para-athletics");
     this.version(1).stores({
       // [athleteId+logDate] で 1日1件を一意管理
       dailyLogs: "id, &[athleteId+logDate], athleteId, logDate, syncStatus, updatedAt",
+    });
+    this.version(2).stores({
+      scheduleEvents: "id, athleteId, eventDate, type, syncStatus, updatedAt",
     });
   }
 }
@@ -44,4 +53,22 @@ export async function saveDailyLogLocal(
   };
   await db.dailyLogs.put(record);
   return record;
+}
+
+/** スケジュールを保存し、同期待ち (pending) としてマークする */
+export async function saveScheduleEventLocal(
+  input: Omit<ScheduleEvent, "id" | "updatedAt"> & { id?: string }
+): Promise<ScheduleEventRecord> {
+  const record: ScheduleEventRecord = {
+    ...input,
+    id: input.id ?? crypto.randomUUID(),
+    updatedAt: new Date().toISOString(),
+    syncStatus: "pending",
+  };
+  await db.scheduleEvents.put(record);
+  return record;
+}
+
+export function deleteScheduleEventLocal(id: string): Promise<void> {
+  return db.scheduleEvents.delete(id);
 }

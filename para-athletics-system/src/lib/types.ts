@@ -35,3 +35,29 @@ export interface DailyLog {
 
 /** レディネス判定の信号色 */
 export type ReadinessLevel = "green" | "yellow" | "red";
+
+/** ③ スケジュール・移動 (ロジスティクス) */
+export type ScheduleType = "practice" | "camp" | "competition" | "travel" | "other";
+
+export interface ScheduleEvent {
+  id: string; // uuid
+  athleteId: string;
+  eventDate: string; // YYYY-MM-DD
+  type: ScheduleType;
+  title: string;
+  transport?: string; // 'flight' | 'shinkansen' 等
+  reference?: string; // 便名/列車名・予約番号
+  location?: string;
+  details?: string;
+  updatedAt: string; // ISO datetime
+}
+
+/** スケジュール種別の表示属性 (アイコン・色) */
+export const SCHEDULE_META: Record<ScheduleType, { label: string; icon: string; color: string }> = {
+  practice: { label: "練習", icon: "🏃", color: "#94a3b8" },
+  camp: { label: "合宿", icon: "🏕️", color: "#0891b2" },
+  competition: { label: "試合", icon: "🏟️", color: "#dc2626" },
+  travel: { label: "移動", icon: "✈️", color: "#d97706" },
+  other: { label: "その他", icon: "📌", color: "#6b7280" },
+};
+

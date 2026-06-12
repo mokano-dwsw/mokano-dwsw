@@ -7,7 +7,8 @@ import { DEMO_ATHLETE_ID } from "@/lib/athlete";
 import { computeReadiness, LEVEL_LABEL, LEVEL_BG } from "@/lib/readiness";
 import { hrvSeries, recentHrvCV, sleepScore, sortByDateAsc } from "@/lib/metrics";
 import { seedDemoData } from "@/lib/demo";
-import BarLineChart, { type ChartPoint } from "@/components/charts/BarLineChart";
+import { SCHEDULE_META } from "@/lib/types";
+import BarLineChart, { type ChartPoint, type ChartMarker } from "@/components/charts/BarLineChart";
 
 /** CV が低いほど疲労蓄積の兆候 (要件) → 信号色に変換。閾値は暫定。 */
 function cvColor(cv: number): { label: string; cls: string } {
@@ -21,6 +22,10 @@ export default function DashboardView() {
   const athleteId = DEMO_ATHLETE_ID;
   const logs = useLiveQuery(
     () => db.dailyLogs.where("athleteId").equals(athleteId).toArray(),
+    [athleteId]
+  );
+  const events = useLiveQuery(
+    () => db.scheduleEvents.where("athleteId").equals(athleteId).toArray(),
     [athleteId]
   );
   const [seeding, setSeeding] = useState(false);
@@ -61,6 +66,17 @@ export default function DashboardView() {
     bar: p.hrv,
     line: p.rolling7,
   }));
+
+  // スケジュール(移動・試合)を HRV 時間軸に合わせてマーカー化
+  const dateIndex = new Map(asc.map((l, i) => [l.logDate, i]));
+  const markers: ChartMarker[] = (events ?? [])
+    .filter((ev) => ev.type === "travel" || ev.type === "competition")
+    .flatMap((ev) => {
+      const i = dateIndex.get(ev.eventDate);
+      if (i == null) return [];
+      const meta = SCHEDULE_META[ev.type];
+      return [{ index: i, icon: meta.icon, color: meta.color, title: `${ev.eventDate} ${ev.title}` }];
+    });
   const readinessPoints: ChartPoint[] = asc.map((l) => ({
     label: l.logDate,
     bar: computeReadiness(l).score ?? undefined,
@@ -86,11 +102,13 @@ export default function DashboardView() {
 
       {/* HRV トレンド: 日次(棒) + 7日移動平均(折れ線) */}
       <section>
-        <h2 className="mb-1 font-semibold">HRV トレンド</h2>
+        <h2 className="mb-1 font-semibold">HRV トレンド × スケジュール</h2>
         <p className="mb-2 text-xs text-gray-500">
-          薄い棒 = 日々の HRV、濃い線 = 7日移動平均。日々の値に一喜一憂せず移動平均で判断する。
+          薄い棒 = 日々の HRV、濃い線 = 7日移動平均。{SCHEDULE_META.travel.icon} 移動 /{" "}
+          {SCHEDULE_META.competition.icon} 試合 を重ね、長距離移動の翌日に HRV
+          が低下する傾向を読み取る。
         </p>
-        <BarLineChart points={hrvPoints} unit=" ms" />
+        <BarLineChart points={hrvPoints} markers={markers} unit=" ms" />
       </section>
 
       {/* レディネス推移 */}

@@ -20,6 +20,16 @@ export default function Home() {
         </Link>
 
         <Link
+          href="/schedule"
+          className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
+        >
+          <h2 className="text-lg font-semibold">✈️ スケジュール・移動</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            合宿・試合・移動を登録。移動は HRV トレンドに重ねて表示。
+          </p>
+        </Link>
+
+        <Link
           href="/dashboard"
           className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
         >
