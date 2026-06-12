@@ -1,0 +1,18 @@
+{
+  "name": "パラ陸上サポートシステム",
+  "short_name": "パラ陸上",
+  "description": "選手・大会・記録を管理するパラ陸上サポートシステム",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
