@@ -40,6 +40,16 @@ export default function Home() {
         </Link>
 
         <Link
+          href="/expenses"
+          className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
+        >
+          <h2 className="text-lg font-semibold">💴 財務・経費</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            遠征費・宿泊費・用具代をカテゴリ別に記録・集計。
+          </p>
+        </Link>
+
+        <Link
           href="/dashboard"
           className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
         >

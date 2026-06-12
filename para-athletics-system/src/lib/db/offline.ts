@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { DailyLog, ScheduleEvent, TrainingLog } from "@/lib/types";
+import type { DailyLog, ScheduleEvent, TrainingLog, Expense } from "@/lib/types";
 
 export type SyncStatus = "pending" | "synced";
 
@@ -18,6 +18,11 @@ export interface TrainingLogRecord extends TrainingLog {
   syncStatus: SyncStatus;
 }
 
+/** オフライン保存用の経費 (同期状態を付与) */
+export interface ExpenseRecord extends Expense {
+  syncStatus: SyncStatus;
+}
+
 /**
  * 端末ローカル (IndexedDB) のオフライン DB。
  * 現場/移動中ではここを唯一の作業ストアとして扱い、オンライン時に Supabase へ同期する。
@@ -26,6 +31,7 @@ class ParaAthleticsDB extends Dexie {
   dailyLogs!: Table<DailyLogRecord, string>;
   scheduleEvents!: Table<ScheduleEventRecord, string>;
   trainingLogs!: Table<TrainingLogRecord, string>;
+  expenses!: Table<ExpenseRecord, string>;
 
   constructor() {
     super("para-athletics");
@@ -38,6 +44,9 @@ class ParaAthleticsDB extends Dexie {
     });
     this.version(3).stores({
       trainingLogs: "id, athleteId, logDate, syncStatus, updatedAt",
+    });
+    this.version(4).stores({
+      expenses: "id, athleteId, spentDate, category, syncStatus, updatedAt",
     });
   }
 }
@@ -98,4 +107,22 @@ export async function saveTrainingLogLocal(
 
 export function deleteTrainingLogLocal(id: string): Promise<void> {
   return db.trainingLogs.delete(id);
+}
+
+/** 経費を保存し、同期待ち (pending) としてマークする */
+export async function saveExpenseLocal(
+  input: Omit<Expense, "id" | "updatedAt"> & { id?: string }
+): Promise<ExpenseRecord> {
+  const record: ExpenseRecord = {
+    ...input,
+    id: input.id ?? crypto.randomUUID(),
+    updatedAt: new Date().toISOString(),
+    syncStatus: "pending",
+  };
+  await db.expenses.put(record);
+  return record;
+}
+
+export function deleteExpenseLocal(id: string): Promise<void> {
+  return db.expenses.delete(id);
 }

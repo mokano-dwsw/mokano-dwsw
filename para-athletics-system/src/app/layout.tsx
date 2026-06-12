@@ -50,6 +50,9 @@ export default function RootLayout({
             <Link href="/schedule" className="text-sm text-gray-600 hover:text-gray-900">
               スケジュール
             </Link>
+            <Link href="/expenses" className="text-sm text-gray-600 hover:text-gray-900">
+              経費
+            </Link>
             <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
               ダッシュボード
             </Link>

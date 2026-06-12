@@ -1,11 +1,12 @@
 // 最小構成のサービスワーカー: アプリシェルをキャッシュしオフライン起動を可能にする。
 // データの永続化は IndexedDB (Dexie) 側が担当する。
-const CACHE = "para-athletics-v3";
+const CACHE = "para-athletics-v4";
 const APP_SHELL = [
   "/",
   "/checkin",
   "/training",
   "/schedule",
+  "/expenses",
   "/dashboard",
   "/manifest.webmanifest",
   "/icon.svg",

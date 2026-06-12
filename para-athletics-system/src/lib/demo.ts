@@ -3,6 +3,7 @@ import {
   type DailyLogRecord,
   type ScheduleEventRecord,
   type TrainingLogRecord,
+  type ExpenseRecord,
 } from "@/lib/db/offline";
 import type { Scale5 } from "@/lib/types";
 
@@ -103,9 +104,46 @@ export async function seedDemoData(athleteId: string, days = 30): Promise<number
     })),
   ];
 
+  // 経費 (移動日に交通費/宿泊費、別途用具代)
+  const expenses: ExpenseRecord[] = [
+    ...travelDaysAgo.flatMap<ExpenseRecord>((d, i) => [
+      {
+        id: `demo-exp-tr-${d}`,
+        athleteId,
+        spentDate: isoDaysAgo(today, d),
+        category: "travel",
+        amountJpy: i === 0 ? 14500 : 38000,
+        description: i === 0 ? "新幹線(東京↔大阪)" : "航空券(羽田↔福岡)",
+        updatedAt: new Date().toISOString(),
+        syncStatus: "synced",
+      },
+      {
+        id: `demo-exp-lg-${d}`,
+        athleteId,
+        spentDate: isoDaysAgo(today, d),
+        category: "lodging",
+        amountJpy: 9800,
+        description: "宿泊(1泊)",
+        updatedAt: new Date().toISOString(),
+        syncStatus: "synced",
+      },
+    ]),
+    {
+      id: "demo-exp-eq",
+      athleteId,
+      spentDate: isoDaysAgo(today, 12),
+      category: "equipment",
+      amountJpy: 22000,
+      description: "スパイク",
+      updatedAt: new Date().toISOString(),
+      syncStatus: "synced",
+    },
+  ];
+
   await db.dailyLogs.bulkPut(logs);
   await db.scheduleEvents.bulkPut(events);
   await db.trainingLogs.bulkPut(trainings);
+  await db.expenses.bulkPut(expenses);
   return logs.length;
 }
 

@@ -51,6 +51,27 @@ export interface TrainingLog {
   updatedAt: string; // ISO datetime
 }
 
+/** ④ 財務・経費 */
+export type ExpenseCategory = "travel" | "lodging" | "equipment" | "other";
+
+export interface Expense {
+  id: string; // uuid
+  athleteId: string;
+  spentDate: string; // YYYY-MM-DD
+  category: ExpenseCategory;
+  amountJpy: number;
+  description?: string;
+  receiptUrl?: string; // AI-OCR 取り込み元のレシート画像 (将来)
+  updatedAt: string; // ISO datetime
+}
+
+export const EXPENSE_META: Record<ExpenseCategory, { label: string; icon: string }> = {
+  travel: { label: "交通費", icon: "🚄" },
+  lodging: { label: "宿泊費", icon: "🏨" },
+  equipment: { label: "用具", icon: "🦿" },
+  other: { label: "その他", icon: "📦" },
+};
+
 /** ③ スケジュール・移動 (ロジスティクス) */
 export type ScheduleType = "practice" | "camp" | "competition" | "travel" | "other";
 
