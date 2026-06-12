@@ -19,10 +19,15 @@ export default function Home() {
           </p>
         </Link>
 
-        <div className="rounded-2xl border border-dashed p-5 text-gray-400">
+        <Link
+          href="/dashboard"
+          className="rounded-2xl border p-5 transition hover:border-blue-500 hover:shadow-sm"
+        >
           <h2 className="text-lg font-semibold">📊 ダッシュボード</h2>
-          <p className="mt-1 text-sm">レディネス推移・HRV・スケジュール×負荷の可視化（実装予定）</p>
-        </div>
+          <p className="mt-1 text-sm text-gray-600">
+            レディネス推移・HRV 7日移動平均・睡眠スコアを可視化。
+          </p>
+        </Link>
       </section>
 
       <p className="mt-8 text-xs text-gray-400">

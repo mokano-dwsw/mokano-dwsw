@@ -44,6 +44,9 @@ export default function RootLayout({
             <Link href="/checkin" className="text-sm text-gray-600 hover:text-gray-900">
               チェックイン
             </Link>
+            <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
+              ダッシュボード
+            </Link>
           </nav>
         </header>
         {children}
